@@ -40,7 +40,7 @@ class IngredientController extends Controller
             }
             return redirect('ingredient')->withErrors([$same->name . ' updated']);
         } else {
-            $curent = Ingredient::create([
+            $current = Ingredient::create([
                 'name' => $request->name,
                 'cost' => $request->cost*100
             ]);
