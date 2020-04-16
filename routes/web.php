@@ -19,6 +19,7 @@ Route::get('/', function () {
 
 Route::get('pizza', 'PizzaController@index');
 Route::post('pizza', 'PizzaController@store');
+Route::get('pizza/remove/{id}', 'PizzaController@remove');
 Route::get('pizza/{name}', 'PizzaController@edit');
 
 Route::get('ingredient', 'IngredientController@index');

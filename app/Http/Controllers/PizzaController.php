@@ -5,18 +5,16 @@ namespace App\Http\Controllers;
 use App\Pizza;
 use App\Ingredient;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class PizzaController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display pizzas list
      *
-     * @return \Illuminate\Http\Response
+     * @return view
      */
     public function index($data = [])
     {
-        //dd($data);
         return view('pizza', array_merge([
             'pizzas' => (new Pizza)->get(),
             'ingredients' => (new Ingredient)->get()
@@ -24,20 +22,10 @@ class PizzaController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Creates or updates pizza
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return redirect
      */
     public function store(Request $request)
     {
@@ -47,40 +35,30 @@ class PizzaController extends Controller
         ]);
 
         $product = new Pizza;
-        Log::debug('Pizza ', [$request->input()]);
         if($same = Pizza::withTrashed()->where('name', $request->name)->first()) {
             if ($same->trashed()) {
                 $same->restore();
             }
             $product = $same;
+            $msg = 'updated';
         } else {
             $product->name = $request->name;
             $product->save();
+            $msg = 'created';
         }
-        //
+        
         $ingredients = Ingredient::find($request->ingredients);
         $product->ingredients()->detach();
         $product->ingredients()->attach($ingredients);
         $product->setPrice()->save();
-        return redirect('pizza')->withErrors([$product->name . ' updated']);
+        return redirect('pizza')->withErrors([$product->name . ' ' . $msg]);
     }
 
     /**
-     * Display the specified resource.
+     * Returns pizzas data to view by name
      *
-     * @param  \App\Pizza  $pizza
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Pizza $pizza)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Pizza  $pizza
-     * @return \Illuminate\Http\Response
+     * @param  string  $pizza_name
+     * @return view
      */
     public function edit($pizza_name)
     {
@@ -95,25 +73,18 @@ class PizzaController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Pizza  $pizza
-     * @return \Illuminate\Http\Response
+     * Soft deletes pizza by id
+     * 
+     * @param integer $id
+     * @return type
      */
-    public function update(Request $request, Pizza $pizza)
+    public function remove($id)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Pizza  $pizza
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Pizza $pizza)
-    {
-        //
+        $msg = 'Pizza not found';
+        if($pizza = Pizza::find($id)) {
+            $msg = $pizza->name . ' removed from list';
+            $pizza->delete();
+        }
+        return redirect('pizza')->withErrors([$msg]);
     }
 }

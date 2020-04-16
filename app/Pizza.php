@@ -30,7 +30,6 @@ class Pizza extends Model
     
     public function getPriceAttribute()
     {
-        //$this->setPrice();
         return number_format($this->attributes['price']/100, 2);
     }
     
