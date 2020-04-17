@@ -31,7 +31,7 @@ class PizzaController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|max:255',
-            'ingredients.*' => 'integer'
+            'ingredients' => 'required'
         ]);
 
         $product = new Pizza;
@@ -51,7 +51,8 @@ class PizzaController extends Controller
         $product->ingredients()->detach();
         $product->ingredients()->attach($ingredients);
         $product->setPrice()->save();
-        return redirect('pizza')->withErrors([$product->name . ' ' . $msg]);
+        
+        return redirect('pizza')->with('success', $product->name . ' ' . $msg);
     }
 
     /**
@@ -80,11 +81,13 @@ class PizzaController extends Controller
      */
     public function remove($id)
     {
+        $msg_type = 'warning';
         $msg = 'Pizza not found';
         if($pizza = Pizza::find($id)) {
+            $msg_type = 'success';
             $msg = $pizza->name . ' removed from list';
             $pizza->delete();
         }
-        return redirect('pizza')->withErrors([$msg]);
+        return redirect('pizza')->with($msg_type, $msg);
     }
 }
