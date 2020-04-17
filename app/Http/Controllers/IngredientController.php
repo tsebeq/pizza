@@ -38,13 +38,13 @@ class IngredientController extends Controller
             if ($same->trashed()) {
                 $same->restore();
             }
-            return redirect('ingredient')->withErrors([$same->name . ' updated']);
+            return redirect('ingredient')->with('success', $same->name . ' updated');
         } else {
             $current = Ingredient::create([
                 'name' => $request->name,
                 'cost' => $request->cost*100
             ]);
-            return redirect('ingredient')->withErrors([$current->name . ' added']);
+            return redirect('ingredient')->with('success', $current->name . ' added');
         }
     }
 
@@ -74,11 +74,13 @@ class IngredientController extends Controller
      */
     public function remove($id)
     {
+        $msg_type = 'warning';
         $msg = 'Ingredient not found';
         if($ingredient = Ingredient::find($id)) {
+            $msg_type = 'success';
             $msg = $ingredient->name . ' removed from ingredients';
             $ingredient->delete();
         }
-        return redirect('ingredient')->withErrors([$msg]);
+        return redirect('ingredient')->with($msg_type, $msg);
     }
 }
